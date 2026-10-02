@@ -66,23 +66,29 @@ section[id]{scroll-margin-top:72px}
 /* ---- Shared bits ---- */
 .eyebrow{font-size:12px;font-weight:800;letter-spacing:.2em;color:var(--cyan);margin:0 0 12px}
 .eyebrow.dark{color:var(--blue)}
-.pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:#2ec4b6;box-shadow:0 0 0 0 rgba(46,196,182,.6);animation:pulseRing 1.8s infinite}
-@keyframes pulseRing{70%{box-shadow:0 0 0 8px rgba(46,196,182,0)}100%{box-shadow:0 0 0 0 rgba(46,196,182,0)}}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .chips span{font-size:11px;background:#edf8fd;border:1px solid #d0eaf6;border-radius:999px;padding:5px 10px;color:#195d82}
-.metric{font-size:44px;font-weight:900;line-height:1;letter-spacing:-.03em;background:linear-gradient(90deg,#0a6090,#38b6e6);-webkit-background-clip:text;background-clip:text;color:transparent}
 
 /* ---- Offerings: pinned, scroll-driven ---- */
-.offerings-sec{position:relative;padding:0;background:var(--navy)}
+.offerings-sec{position:relative;padding:0;background:var(--navy);height:calc(var(--n,5) * 100vh)}
 .ofx-sticky{position:sticky;top:0;height:100vh;overflow:hidden}
+@supports (height:100svh){
+  .offerings-sec{height:calc(var(--n,5) * 100svh)}
+  .ofx-sticky{height:100svh}
+}
 .ofx-stage{position:relative;width:100%;height:100%;overflow:hidden;background:var(--navy)}
-.ofx-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:ofxFade .6s ease}
-.ofx-shade{position:absolute;inset:0;z-index:1;
-  background:linear-gradient(90deg,rgba(0,0,0,.85) 0%,rgba(3,24,46,.35) 65%,rgba(0,0,0,.15) 100%),
-             linear-gradient(0deg,rgba(3,24,46,.7) 0%,transparent 10%)}
 
-/* left: details */
-.ofx-content{position:relative;z-index:2;height:100%;display:flex;align-items:flex-end;padding:40px 5% 110px;color:#fff;animation:ofxUp .55s ease}
+/* all videos stacked; the active one fades in on top, the old one drops after the fade */
+.ofx-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;z-index:0;transition:opacity .01s linear .8s}
+.ofx-video.on{opacity:1;z-index:1;transition:opacity .8s ease}
+
+/* lighter overlay so the video is actually visible */
+.ofx-shade{position:absolute;inset:0;z-index:2;
+  background:linear-gradient(90deg,rgba(0,0,0,.68) 0%,rgba(3,24,46,.25) 60%,rgba(0,0,0,.05) 100%),
+             linear-gradient(0deg,rgba(3,24,46,.6) 0%,transparent 25%)}
+
+/* details */
+.ofx-content{position:relative;z-index:3;height:100%;display:flex;align-items:flex-end;padding:40px 5% 110px;color:#fff;animation:ofxUp .55s ease}
 .ofx-main{max-width:620px}
 .ofx-main h3{font-size:clamp(30px,3.6vw,52px);line-height:1.05;letter-spacing:-.03em;margin:0 0 14px;color:#fff}
 .ofx-text{font-size:16px;line-height:1.6;color:#d4e2ec;margin:0 0 20px}
@@ -98,25 +104,6 @@ section[id]{scroll-margin-top:72px}
 .ofx-more:hover::before{transform:none}
 .ofx-more:hover b{transform:translateX(5px)}
 .ofx-more:focus-visible,.ofx-close:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
-
-/* right: use cases, glass over video */
-.ofx-deck-wrap{position:absolute;z-index:3;right:5%;top:90px;bottom:110px;width:340px;display:flex;flex-direction:column;gap:10px}
-.ofx-deck{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:16px;overflow:visible}
-.ofx-case{opacity:0;transform:translateX(120px) rotate(4deg);animation:deckIn .65s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(var(--i,0) * .15s)}
-@keyframes deckIn{to{opacity:1;transform:none}}
-.glass-case{display:flex;gap:14px;padding:14px;border-radius:20px;color:#fff;
-  background:rgba(3,24,46,.30);border:1px solid rgba(255,255,255,.22);
-  backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);
-  box-shadow:0 18px 40px rgba(0,0,0,.25);
-  transition:transform .3s ease,background .3s ease,border-color .3s ease}
-.glass-case:hover{transform:translateY(-4px);background:rgba(3,24,46,.5);border-color:var(--cyan)}
-.glass-thumb{position:relative;flex:none;width:96px;border-radius:14px;overflow:hidden}
-.glass-thumb img{object-fit:cover}
-.glass-body{min-width:0}
-.glass-tag{display:inline-block;padding:4px 10px;margin-bottom:6px;border-radius:999px;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25)}
-.glass-body .metric{font-size:38px;background:linear-gradient(90deg,#9be7ff,#fff);-webkit-background-clip:text;background-clip:text;color:transparent}
-.glass-label{margin-top:4px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan)}
-.glass-body p{margin:8px 0 0;font-size:12px;line-height:1.45;color:#d4e2ec}
 
 /* bottom pager = progress + click to jump */
 .ofx-pager{position:absolute;z-index:4;left:5%;bottom:32px;display:flex;align-items:center;gap:12px}
@@ -202,22 +189,26 @@ footer{background:#021323;color:#a9bfd0;padding:22px 0;font-size:11px}
 @keyframes revealRight{from{opacity:0;transform:translateX(48px)}to{opacity:1;transform:none}}
 @keyframes revealLeft{from{opacity:0;transform:translateX(-48px)}to{opacity:1;transform:none}}
 
-/* ---- Responsive ---- */
+/* ---- Responsive: tablets ---- */
 @media(max-width:1200px){
-  .ofx-deck-wrap{width:300px}
+  .ofx-content{padding-left:6%}
 }
 @media(max-width:1000px){
-  .nav-links{display:none}
-  .hero{min-height:650px}
-  .hero-content{padding:80px 0}
+  .nav-inner{height:60px}
+  .brand-logo{height:48px}
+  .nav-dd{display:none}
+  .nav-links{font-size:14px}
+  section[id]{scroll-margin-top:60px}
 
-  .ofx-deck-wrap{top:76px;bottom:auto;left:5%;right:5%;width:auto}
-  .ofx-deck{flex-direction:row;overflow-x:auto;justify-content:flex-start}
-  .glass-case{flex:0 0 260px}
-  .glass-thumb{display:none}
-  .ofx-content{padding-bottom:110px}
+  .hero{min-height:100vh;min-height:100svh}
+  .hero-content{padding:90px 0 60px}
+  .eyebrow{letter-spacing:.14em;line-height:1.7}
+
+  .ofx-shade{background:linear-gradient(0deg,rgba(3,24,46,.94) 0%,rgba(3,24,46,.6) 45%,rgba(3,24,46,.1) 100%)}
+  .ofx-content{padding:40px 6% 96px}
+  .ofx-main{max-width:640px}
   .ofx-scrollhint{display:none}
-  .ofx-pager{left:5%;right:5%;bottom:22px;justify-content:center;gap:8px}
+  .ofx-pager{left:6%;right:6%;bottom:20px;justify-content:center;gap:8px}
   .ofx-pill-text{display:none}
   .ofx-pill{padding:12px 16px}
   .ofx-arrow{width:40px;height:40px}
@@ -228,11 +219,36 @@ footer{background:#021323;color:#a9bfd0;padding:22px 0;font-size:11px}
   .contact-map{min-height:320px}
   .contact-sub{margin-bottom:34px}
 }
+
+/* ---- Responsive: phones ---- */
 @media(max-width:600px){
-  .footer-inner{flex-direction:column}
+  .container{width:90%}
+  .hero-brand{letter-spacing:.14em;padding-left:.14em}
+  .hero-brand .typed{left:.14em}
+  .tagline{letter-spacing:.2em}
   .hero-overlay{background:linear-gradient(90deg,rgba(3,24,46,.98),rgba(3,24,46,.7))}
-  .ofx-main h3{font-size:30px}
-  .ofx-text{font-size:14px}
+
+  .ofx-main h3{font-size:28px}
+  .ofx-text{font-size:14px;margin-bottom:14px}
+  .ofx-points{gap:8px;margin-bottom:18px}
+  .ofx-points li{font-size:12px;padding:8px 12px}
+  .ofx-more{padding:11px 20px;font-size:14px}
+
+  .contact-title{font-size:32px}
+  .c-row{padding:12px 14px;gap:12px}
+  .c-ico{width:38px;height:38px}
+  .c-row strong{font-size:14px}
+  .c-actions .button{flex:1;justify-content:center}
+  .contact-map{min-height:260px}
+  .footer-inner{flex-direction:column}
+}
+
+/* phones in landscape */
+@media(max-height:520px) and (orientation:landscape){
+  .ofx-text{display:none}
+  .ofx-content{padding-bottom:80px}
+  .ofx-main h3{font-size:24px;margin-bottom:10px}
+  .ofx-points{margin-bottom:12px}
 }
 
 /* ---- Accessibility ---- */
@@ -240,12 +256,12 @@ footer{background:#021323;color:#a9bfd0;padding:22px 0;font-size:11px}
   .reveal{opacity:1}
   .reveal.in{animation:none}
   .hero-fade{opacity:1;transform:none;transition:none}
-  .caret.blink,.pulse{animation:none}
+  .caret.blink{animation:none}
   .nav{transition:none}
-  .ofx-video,.ofx-content,.ofx-modal,.ofx-modal-box{animation:none}
+  .ofx-video,.ofx-video.on{transition:none}
+  .ofx-content,.ofx-modal,.ofx-modal-box{animation:none}
   .ofx-points li{animation:none;opacity:1}
-  .ofx-case{animation:none;opacity:1;transform:none}
   .ofx-scrollhint i::after{animation:none}
   .ofx-more,.ofx-more b,.button,.button b,.button::before,.ofx-more::before,.c-row,.c-ico{transition:none}
-  .button:hover,.glass-case:hover,a.c-row:hover{transform:none}
+  .button:hover,a.c-row:hover{transform:none}
 }

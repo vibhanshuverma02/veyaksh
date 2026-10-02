@@ -1,6 +1,3 @@
-
-
-
 'use client';
 
 import Image from 'next/image';
@@ -19,9 +16,6 @@ const offerings = [
       does: ['Detects intrusion, crowding and unusual activity', 'Manages entry points and restricted zones', 'Gives security teams one dashboard across buildings'],
       fits: ['Universities', 'Schools', 'Hostels and residential campuses'],
     },
-    // cases: [
-    //   ['40%', 'Reduction in manual monitoring effort', 'Campus Safety', 'campus.jpg', 'Automated alerts reduce the need for staff to watch camera feeds continuously.'],
-    // ],
   },
   {
     title: 'Civic & Urban Technology',
@@ -33,10 +27,6 @@ const offerings = [
       does: ['Tracks traffic flow and congestion points', 'Flags incidents in public areas', 'Monitors air, water and noise with sensors'],
       fits: ['Municipalities', 'Smart city projects', 'Tourist and public areas'],
     },
-    // cases: [
-    //   ['60%', 'Improvement in incident response time', 'Smart Cities', 'city.jpg', 'Faster detection of incidents and quicker dispatch to the right team.'],
-    //   ['30%', 'Better resource utilization', 'Environment', 'mountain.jpg', 'Sensor data helps teams plan water, energy and field resources.'],
-    // ],
   },
   {
     title: 'Industrial Monitoring',
@@ -48,9 +38,6 @@ const offerings = [
       does: ['Detects equipment anomalies before failure', 'Checks PPE and restricted-zone compliance', 'Tracks energy consumption by line or area'],
       fits: ['Factories', 'Warehouses', 'Power and utility sites'],
     },
-    // cases: [
-    //   ['25%', 'Increase in operational efficiency', 'Industry 4.0', 'industrial.jpg', 'Early warning on equipment faults and safety violations.'],
-    // ],
   },
   {
     title: 'Drone & Autonomous Systems',
@@ -62,10 +49,6 @@ const offerings = [
       does: ['Covers large perimeters and terrain', 'Automates inspection capture and processing', 'Produces maps and survey outputs'],
       fits: ['Border and perimeter areas', 'Infrastructure inspection', 'Field and terrain surveys'],
     },
-    // cases: [
-    //   ['50%', 'Faster inspection and mapping', 'Drone Operations', 'drone.jpg', 'Automated capture and processing shorten inspection and survey cycles.'],
-    //   ['99%', 'System uptime on edge deployments', 'Defence & Borders', 'hero.jpg', 'Edge processing keeps monitoring running when network links are weak or unavailable.'],
-    // ],
   },
 ];
 
@@ -74,17 +57,15 @@ const BRAND = 'VEYAKSH';
 const CONTACT = {
   phoneLabel: '+91 63989 37356',
   phoneHref: 'tel:+916398937356',
-  email: 'hello@veyaksh.co.in', // email setup hone ke baad hi live karna
+  email: 'hello@veyaksh.co.in', // keep only after ImprovMX test mail works
   instagramHandle: '@veyaksh.co.in',
   instagram: 'https://www.instagram.com/veyaksh.co.in/',
-  linkedin: '', // page bane to link daalna
+  linkedin: '', // add your LinkedIn page link when it exists
   address:
     '536/G3, 1st Floor, Ambey Apartments, near Gate 10, IIT Roorkee, Solanipuram, Roorkee 247667, Haridwar, Uttarakhand',
   mapSrc:
     'https://www.google.com/maps?q=' +
-    encodeURIComponent(
-      '536/G3 Ambey Apartments, near Gate 10 IIT Roorkee, Solanipuram, Roorkee 247667'
-    ) +
+    encodeURIComponent('536/G3 Ambey Apartments, near Gate 10 IIT Roorkee, Solanipuram, Roorkee 247667') +
     '&output=embed',
 };
 
@@ -135,33 +116,12 @@ function useTypewriter(text: string, speed = 150, startDelay = 500) {
   return count;
 }
 
-// Counts a value like "40%" up from 0 when the card mounts
-function CountUp({ value }: { value: string }) {
-  const m = value.match(/^(\d+)(.*)$/);
-  const target = m ? parseInt(m[1], 10) : 0;
-  const suffix = m ? m[2] : '';
-  const [n, setN] = useState(0);
-
-  useEffect(() => {
-    if (!m) return;
-    if (prefersReducedMotion()) {
-      setN(target);
-      return;
-    }
-    let raf = 0;
-    const start = performance.now();
-    const dur = 1100;
-    const step = (t: number) => {
-      const p = Math.min((t - start) / dur, 1);
-      setN(Math.round(target * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) raf = requestAnimationFrame(step);
-    };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-  }, [target]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  if (!m) return <>{value}</>;
-  return <>{n}{suffix}</>;
+// Scroll range of the pinned section, based on the sticky box's real height
+// (on phones 100vh and the visible height differ, so don't use innerHeight)
+function getRange(sec: HTMLElement) {
+  const sticky = sec.firstElementChild as HTMLElement | null;
+  const h = sticky?.offsetHeight ?? window.innerHeight;
+  return sec.offsetHeight - h;
 }
 
 export default function Home() {
@@ -173,7 +133,7 @@ export default function Home() {
 
   const heroRef = useRef<HTMLElement | null>(null);
   const offeringsRef = useRef<HTMLElement | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   const current = offerings[activeOffering];
   const typed = useTypewriter(BRAND);
@@ -183,7 +143,7 @@ export default function Home() {
   const scrollToOffering = (i: number) => {
     const el = offeringsRef.current;
     if (!el) return;
-    const range = el.offsetHeight - window.innerHeight;
+    const range = getRange(el);
     const step = range / offerings.length;
     const top = el.getBoundingClientRect().top + window.scrollY;
     window.scrollTo({ top: top + (i + 0.5) * step, behavior: 'smooth' });
@@ -225,7 +185,7 @@ export default function Home() {
       raf = 0;
       const el = offeringsRef.current;
       if (!el) return;
-      const range = el.offsetHeight - window.innerHeight;
+      const range = getRange(el);
       if (range <= 0) return;
       const scrolled = Math.min(Math.max(-el.getBoundingClientRect().top, 0), range);
       const step = range / offerings.length;
@@ -245,12 +205,13 @@ export default function Home() {
     };
   }, []);
 
-  // Play the video only while the section is visible
+  // Play only the active video, pause the rest
   useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    if (inView) v.play().catch(() => {});
-    else v.pause();
+    videoRefs.current.forEach((v, i) => {
+      if (!v) return;
+      if (inView && i === activeOffering) v.play().catch(() => {});
+      else v.pause();
+    });
   }, [inView, activeOffering]);
 
   // Modal: Esc to close + lock body scroll
@@ -281,6 +242,7 @@ export default function Home() {
       <nav className={`nav ${navVisible ? 'show' : ''}`} aria-hidden={!navVisible}>
         <div className="container nav-inner">
           <a href="#top" className="brand">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/images/logo.png" alt="VEYAKSH" className="brand-logo" />
           </a>
           <div className="nav-links">
@@ -345,23 +307,28 @@ export default function Home() {
         id="offerings"
         className="offerings-sec"
         ref={offeringsRef}
-        style={{ height: `${(offerings.length + 1) * 100}vh` }}
+        style={{ '--n': offerings.length + 1 } as CSSProperties}
       >
         <div className="ofx-sticky">
           <div className="ofx-stage">
-            <video
-              ref={videoRef}
-              key={current.video}
-              className="ofx-video"
-              src={current.video}
-              autoPlay
-              muted
-              loop
-              playsInline
-            />
+            {/* All videos stay mounted; the active one fades in, the others pause */}
+            {offerings.map((o, i) => (
+              <video
+                key={o.video}
+                ref={(el) => {
+                  videoRefs.current[i] = el;
+                }}
+                className={`ofx-video ${activeOffering === i ? 'on' : ''}`}
+                src={o.video}
+                muted
+                loop
+                playsInline
+                preload={Math.abs(i - activeOffering) <= 1 ? 'auto' : 'metadata'}
+              />
+            ))}
             <div className="ofx-shade" />
 
-            {/* LEFT: details */}
+            {/* Details */}
             <div className="ofx-content" key={current.title}>
               <div className="ofx-main">
                 <h3>{current.title}</h3>
@@ -378,25 +345,6 @@ export default function Home() {
                 </button>
               </div>
             </div>
-
-            {/* RIGHT: use cases over video */}
-            {/* <div className="ofx-deck-wrap">
-              <div className="ofx-deck" key={`deck-${activeOffering}`}>
-                {current.cases.map(([metric, label, title, image, desc], i) => (
-                  <article className="glass-case ofx-case" key={title} style={{ '--i': i } as CSSProperties}>
-                    <div className="glass-thumb">
-                      <Image src={`/images/${image}`} alt={title} fill sizes="110px" />
-                    </div>
-                    <div className="glass-body">
-                      <span className="glass-tag">{title}</span>
-                      <div className="metric"><CountUp value={metric} /></div>
-                      <div className="glass-label">{label}</div>
-                      <p>{desc}</p>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div> */}
 
             {/* PAGER: progress + click to jump */}
             <div className="ofx-pager" role="group" aria-label="Choose offering">
@@ -486,40 +434,48 @@ export default function Home() {
                   <span><small>EMAIL</small><strong>{CONTACT.email}</strong></span>
                 </a>
 
-                <a className="c-row" href={CONTACT.instagram} target="_blank" rel="noopener noreferrer">
-                  <span className="c-ico">{Icon.instagram}</span>
-                  <span><small>INSTAGRAM</small><strong>{CONTACT.instagramHandle}</strong></span>
-                </a>
+                {CONTACT.instagram && (
+                  <a className="c-row" href={CONTACT.instagram} target="_blank" rel="noopener noreferrer">
+                    <span className="c-ico">{Icon.instagram}</span>
+                    <span><small>INSTAGRAM</small><strong>{CONTACT.instagramHandle}</strong></span>
+                  </a>
+                )}
 
-                <a className="c-row" href={CONTACT.linkedin} target="_blank" rel="noopener noreferrer">
-                  <span className="c-ico">{Icon.linkedin}</span>
-                  <span><small>LINKEDIN</small><strong>VEYAKSH</strong></span>
-                </a>
+                {CONTACT.linkedin && (
+                  <a className="c-row" href={CONTACT.linkedin} target="_blank" rel="noopener noreferrer">
+                    <span className="c-ico">{Icon.linkedin}</span>
+                    <span><small>LINKEDIN</small><strong>VEYAKSH</strong></span>
+                  </a>
+                )}
 
-                <div className="c-row c-static">
-                  <span className="c-ico">{Icon.pin}</span>
-                  <span><small>VISIT US</small><strong>{CONTACT.address}</strong></span>
-                </div>
+                {CONTACT.address && (
+                  <div className="c-row c-static">
+                    <span className="c-ico">{Icon.pin}</span>
+                    <span><small>VISIT US</small><strong>{CONTACT.address}</strong></span>
+                  </div>
+                )}
 
                 <div className="c-actions">
                   <a className="button" href={CONTACT.phoneHref}>
                     <span>Call us</span><b aria-hidden>→</b>
                   </a>
-                  <a className="button " href={`mailto:${CONTACT.email}`}>
+                  <a className="button" href={`mailto:${CONTACT.email}`}>
                     <span>Send an email</span><b aria-hidden>→</b>
                   </a>
                 </div>
               </div>
 
-              <div className="contact-map">
-                <iframe
-                  src={CONTACT.mapSrc}
-                  title="VEYAKSH location"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  allowFullScreen
-                />
-              </div>
+              {CONTACT.mapSrc && (
+                <div className="contact-map">
+                  <iframe
+                    src={CONTACT.mapSrc}
+                    title="VEYAKSH location"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    allowFullScreen
+                  />
+                </div>
+              )}
             </div>
           </Reveal>
         </div>
